@@ -101,10 +101,12 @@ if __name__ == "__main__":
     k = int(sys.argv[2])
     n = int(sys.argv[3])
 
+    assert n < 26, "n must be less than 26 in current experiment."
+
     # n_samples = 50
     # k = 10
     # n = 10
-    points_sets = generate_unique_sets(100, 10, 10)
+    points_sets = generate_unique_sets(n_samples=n_samples, k=k, n=n)
     examples = []
     for _sets in points_sets:
         points_str = points_to_str(_sets)
