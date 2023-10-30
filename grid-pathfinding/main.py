@@ -42,11 +42,14 @@ def test_2d_grid():
     print(g.plot_path(shortest_path))
 
     # dijkstra 给出的路径是正确的
-    # 可以根据 gpt给出的路径长度, 和 dijkstra 给出的路径长度, 判断 gpt 的路径长度是否是最短的
+    # 1. 可以根据 gpt给出的路径长度, 和 dijkstra 给出的路径长度, 判断 gpt 的路径长度是否是最短的
     print (f"Shortest Path: {len(shortest_path)}")
 
-    # 检查路径的合法性, 可以检查gpt给出的每一步的路径, 是否走上了障碍物, 是否是走到相邻节点
+    # 2. 检查路径的合法性, 可以检查gpt给出的每一步的路径, 是否走上了障碍物, 是否是走到相邻节点
     print ("Verified: ", verify_path(g, shortest_path, obstacles))
+    
+    # 3. 评估路径是否到达了终点
+    print ("Reached destination: ", shortest_path[-1] == dest)
 
 def test_3d_grid():
     # n 网格的尺寸, k为障碍物的数量
@@ -61,12 +64,14 @@ def test_3d_grid():
     shortest_path = dijkstra(g, src, dest)
 
     # dijkstra 给出的路径是正确的
-    # 可以根据 gpt给出的路径长度, 和 dijkstra 给出的路径长度, 判断 gpt 的路径长度是否是最短的
+    # 1. 可以根据 gpt给出的路径长度, 和 dijkstra 给出的路径长度, 判断 gpt 的路径长度是否是最短的
     print (f"Shortest Path: {len(shortest_path)}")
 
-    # 检查路径的合法性, 可以检查gpt给出的每一步的路径, 是否走上了障碍物, 是否是走到相邻节点
+    # 2. 检查路径的合法性, 可以检查gpt给出的每一步的路径, 是否走上了障碍物, 是否是走到相邻节点
     print ("Verified: ", verify_path(g, shortest_path, obstacles))
 
+    # 3. 评估路径是否到达了终点
+    print ("Reached destination: ", shortest_path[-1] == dest)
 
 if __name__ == "__main__":
     # main()
