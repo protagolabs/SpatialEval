@@ -1,8 +1,9 @@
 # SpatialEval
 
 ## Setup Environments
-python=3.10.13
+This repository has been tested with Python version 3.10.13.
 
+Install requirements with the command:
 ```
 pip install -r requirements.txt
 ```
