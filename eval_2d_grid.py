@@ -1,27 +1,46 @@
 from utils.chat_models import OAI_MODEL_4, OpenAIChatModel
 import json, sys, os, re
+import argparse
+
 
 baseline_prompt = """There is a {N}*{N} grid:
 <grid>
 {empty_grid}
 </grid>
-```
 
 Draw the following points on the grid:
 {points}
 
+You must wrap the grid with <grid> and </grid> tags.
 """
 
 def compare_grid(pred, label):
     if pred == label:
         return 1
 
-if __name__ == "__main__":
-    chat_model = OpenAIChatModel(OAI_MODEL_4, temperature=0.0)
+def setup_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--path", type=str, help="Path to the json file.")
+    parser.add_argument("--model", type=str, help="openai model name.", default="gpt-3.5-turbo-0613")
+    args = parser.parse_args()
+    return args
 
-    # path = "data/2d_grid_samples50_points10_size10.json"
-    path = sys.argv[1]
+def extract_grid_from_response(response):
+    extract_grid = re.compile(r"<grid>(.*)</grid>", re.DOTALL)
+    grids = extract_grid.findall(response)
+    # If we doesn't find any grid, return empty string
+    if len(grids) == 0:
+        return ""
+
+    return grids[0]
+
+if __name__ == "__main__":
+    args = setup_args()
+    path = args.path
+    model = args.model
     assert os.path.exists(path), f"File {path} does not exist."
+
+    chat_model = OpenAIChatModel(model, temperature=0.0)
 
     with open(path, "r") as f:
         test_set = json.load(f)
@@ -40,19 +59,12 @@ if __name__ == "__main__":
             }
         ]
 
-        resp = ""
-        rgenerator = chat_model.stream_response(messages=messages)
-        for text_chunk in rgenerator:
-            resp += text_chunk
-            print (text_chunk, end="", flush=True)
-        print ()
+        resp = chat_model.response(messages=messages)
+        print (resp)
 
-        # resp = chat_model.response(messages=messages)
-        # print (resp)
+        # 
+        grid = extract_grid_from_response(resp)
 
-        extract_grid = re.compile(r"<grid>(.*)</grid>", re.DOTALL)
-        grid = extract_grid.findall(resp)[0]
-        print (grid)
         example["llm_prediction"] = resp
         example["llm_response"] = grid
 

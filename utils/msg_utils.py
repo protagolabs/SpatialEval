@@ -107,7 +107,7 @@ def get_oai_fees(model_name: str, prompt_tokens: int, completion_tokens: int) ->
     else:
         raise ValueError(f"Unknown model name {model_name}")
 
-    print (f"Model name used for billing: {model_name}")
+    # print (f"Model name used for billing: {model_name}")
     if model_name not in OAI_PRICE_DICT:
         return -1
     return (OAI_PRICE_DICT[model_name]["prompt"] * prompt_tokens + OAI_PRICE_DICT[model_name]["completion"] * completion_tokens) / 1000
