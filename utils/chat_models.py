@@ -5,10 +5,14 @@ from typing import (
 from openai import OpenAI
 from tenacity import retry, wait_random_exponential, stop_after_attempt
 from .msg_utils import get_token_num, get_oai_fees
+import os
 # from ..utils.logger_utils import logger as chat_logger
 
 OAI_MODEL_3_5 = "gpt-3.5-turbo-0613"
 OAI_MODEL_4 = "gpt-4"
+OPENAI_API_KEY = None # Set your openai api key here
+if OPENAI_API_KEY is None and os.environ.get("OPENAI_API_KEY") is not None:
+    OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
 class ChatModel(ABC):
     @abstractmethod
@@ -31,7 +35,7 @@ class OpenAIChatModel(ChatModel):
     @retry(wait=wait_random_exponential(min=1, max=40), stop=stop_after_attempt(3))
     def stream_response(self, messages: List[Dict]) -> Generator[str, None, None]:
 
-        client = OpenAI()
+        client = OpenAI(api_key=OPENAI_API_KEY)
 
         rbody_generator = client.chat.completions.create(model=self.model, messages=messages, stream=True, 
                                                             seed=self.seed,
@@ -56,7 +60,7 @@ class OpenAIChatModel(ChatModel):
     @retry(wait=wait_random_exponential(min=1, max=40), stop=stop_after_attempt(3))
     def response(self, messages: List[Dict], functions=None, function_call="auto") -> str:
 
-        client = OpenAI()
+        client = OpenAI(api_key=OPENAI_API_KEY)
 
         if functions:
             rbody = client.chat.completions.create(model=self.model, messages=messages, stream=False,
