@@ -75,5 +75,5 @@ def test_3d_grid():
 
 if __name__ == "__main__":
     # main()
-    # test_3d_grid()
-    test_2d_grid()
+    test_3d_grid()
+    # test_2d_grid()
