@@ -3,7 +3,12 @@
 ## Setup Environments
 This repository has been tested with Python version 3.10.13.
 
-Install requirements with the command:
+Install PyTorch:  
+```
+pip install torch==2.2.2 --index-url https://download.pytorch.org/whl/cu121
+```
+
+Install requirements with the command:  
 ```
 pip install -r requirements.txt
 ```

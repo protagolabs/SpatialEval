@@ -1,7 +1,6 @@
-from utils.chat_models import OAI_MODEL_4, OpenAIChatModel
+from utils.chat_models import OpenAIChatModel, HFChatModel
 import json, sys, os, re
 import argparse
-
 
 baseline_prompt = """There is a {N}*{N} grid:
 <grid>
@@ -15,13 +14,13 @@ You must wrap the grid with <grid> and </grid> tags.
 """
 
 def compare_grid(pred, label):
-    if pred == label:
+    if pred.strip() == label.strip():
         return 1
 
 def setup_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--path", type=str, help="Path to the json file.")
-    parser.add_argument("--model", type=str, help="openai model name.", default="gpt-3.5-turbo-0613")
+    parser.add_argument("--model", type=str, help="openai model name.", default="gpt-3.5-turbo-0125")
     args = parser.parse_args()
     return args
 
@@ -40,13 +39,23 @@ if __name__ == "__main__":
     model = args.model
     assert os.path.exists(path), f"File {path} does not exist."
 
-    chat_model = OpenAIChatModel(model, temperature=0.0)
+    # 1. Init Model
+    if model.startswith("gpt-"):
+        chat_model = OpenAIChatModel(model, temperature=0.0)
+    else:
+        chat_model = HFChatModel(model, temperature=0.0)
+
+    if "/" in model:
+        model_name = model.split("/")[-1]
+    else:
+        model_name = model
 
     with open(path, "r") as f:
         test_set = json.load(f)
 
     correct = 0
     total_samples = len(test_set)
+    total_fees = 0
 
     for i, example in enumerate(test_set):
         prompt = baseline_prompt.format(**example)
@@ -59,14 +68,15 @@ if __name__ == "__main__":
             }
         ]
 
-        resp = chat_model.response(messages=messages)
+        resp, cost = chat_model.response(messages=messages)
+        total_fees += cost['fees']
         print (resp)
 
         # 
         grid = extract_grid_from_response(resp)
 
         example["llm_prediction"] = resp
-        example["llm_response"] = grid
+        example["llm_final_answer"] = grid
 
         print (f"Progress: {i+1}/{total_samples}")
         if compare_grid(grid, label=example["ground_truth"]):
@@ -77,9 +87,10 @@ if __name__ == "__main__":
             print (f"Error! \nGround truth:\n{example['ground_truth']}")
             # TODO: get error points number
 
-    save_path = path.replace(".json", "_with_pred.json")
+    save_path = path.replace(".json", f"_{model_name}.json")
     with open(save_path, "w") as f:
         json.dump(test_set, f, indent=4)
 
     print (f"Accuracy: {correct}/{total_samples}")
+    print (f"fees: {total_fees}")
     
