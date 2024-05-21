@@ -3,6 +3,12 @@ import random
 import string
 import sys
 import json
+from pydantic import BaseModel, Field
+
+class Grid2dPoint(BaseModel):
+    marks: str = Field(..., length=1)
+    x: str = Field(..., regex="[a-z]")
+    y: int = Field(..., ge=0)
 
 def draw_empty_grid(n):
     s = "  "
@@ -18,10 +24,13 @@ def draw_empty_grid(n):
     return s
 
 def generate_random_triplets(k, n):
+    """
+    Generate k random triplets (mark, x, y) in N*N grid.
+    """
     triplets = []
     letters = string.ascii_uppercase
 
-    while len(triplets) < k:
+    while len(triplets) <= k:
         letter = random.choice(letters)
         x = random.randint(0, n-1)
         y = random.randint(0, n-1)
