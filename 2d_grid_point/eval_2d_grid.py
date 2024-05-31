@@ -1,6 +1,7 @@
 from utils.chat_models import OpenAIChatModel, HFChatModel
 import json, sys, os, re
 import argparse
+import time
 
 baseline_prompt = """There is a {N}*{N} grid:
 <grid>
@@ -146,6 +147,8 @@ if __name__ == "__main__":
     total_samples = len(test_set)
     total_fees = 0
 
+    start_time = time.time()
+
     for i, example in enumerate(test_set):
         prompt = baseline_prompt.format(**example)
         print (prompt)
@@ -186,11 +189,15 @@ if __name__ == "__main__":
     if model_name.startswith("gpt-") or model_name.startswith("claude"):
         print (f"Total fees: {total_fees}")
 
+    end_time = time.time()
+    eval_time_cost = end_time - start_time
+
     # Save metric 
     with open(f"./tmp/exp01/evaluation_{model_name}.json", "w") as f:
         metric = {
             "accuracy": correct/total_samples,
-            "mean_points_recall": calculate_mean_points_recall(test_set)['mean_points_recall']
+            "mean_points_recall": calculate_mean_points_recall(test_set)['mean_points_recall'],
+            "eval_time_cost": f"{eval_time_cost:.3f}"
         }
         if model_name.startswith("gpt-") or model_name.startswith("claude"):
             metric["total_fees"] = total_fees
